@@ -126,8 +126,7 @@ const configure = ({ collectionPath, enabled, intervalMinutes }) => {
 };
 
 // Re-arm the timer for a collection that already has auto-commit enabled.
-// Called whenever the renderer resolves a collection's git config so timers
-// survive restarts without needing a separate boot-time restore pass.
+// Called whenever the renderer resolves a collection's git config.
 const resumeIfEnabled = (collectionPath) => {
   const config = getConfig(collectionPath);
   if (config.enabled && !timers.has(collectionPath)) {
@@ -136,8 +135,23 @@ const resumeIfEnabled = (collectionPath) => {
   return config;
 };
 
+// Boot-time restore: re-arm timers for every collection that has auto-commit
+// enabled, so scheduled commits keep running after app restart even if the
+// user never opens that collection's Git settings page this session.
+const restoreEnabledTimers = () => {
+  const configs = autoCommitStore.get('configs') || {};
+  for (const encodedPath of Object.keys(configs)) {
+    const collectionPath = decodeURIComponent(encodedPath);
+    const cfg = configs[encodedPath] || {};
+    if (cfg.enabled && !timers.has(collectionPath)) {
+      armTimer(collectionPath, clampInterval(cfg.intervalMinutes));
+    }
+  }
+};
+
 const initGitAutoCommitService = (mainWindow) => {
   mainWindowRef = mainWindow;
+  restoreEnabledTimers();
 };
 
 module.exports = {
