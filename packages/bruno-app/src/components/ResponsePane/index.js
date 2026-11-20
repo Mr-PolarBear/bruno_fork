@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useCallback, useState } from 'react';
 import find from 'lodash/find';
 import classnames from 'classnames';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,12 +27,19 @@ import WSMessagesList from './WsResponsePane/WSMessagesList';
 import ResponsiveTabs from 'ui/ResponsiveTabs';
 import { useSetAsVariable } from 'providers/SetAsVariable/context';
 import useResponsePaneErrors from 'hooks/useResponsePaneErrors';
+import { IconMaximize, IconMinimize } from '@tabler/icons';
 
 // Width threshold for expanded right-side action buttons
 const RIGHT_CONTENT_EXPANDED_WIDTH = 135;
 
 const ResponsePane = ({ item, collection }) => {
   const dispatch = useDispatch();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const wrapperRef = useRef(null);
+  // Rect of the request-workspace area (section.main) that the fullscreen
+  // overlay covers. Keeping the overlay inside this rect avoids overlapping
+  // the app-level header / window controls at the top of the window.
+  const [fsRect, setFsRect] = useState(null);
   const tabs = useSelector((state) => state.tabs.tabs);
   const activeTabUid = useSelector((state) => state.tabs.activeTabUid);
   const isLoading = ['queued', 'sending'].includes(item.requestState);
@@ -75,6 +82,41 @@ const ResponsePane = ({ item, collection }) => {
       dispatch(updateResponseViewTab({ uid: item.uid, responseViewTab: initialTab }));
     }
   }, [contentType, initialFormat, initialTab, persistedFormat, persistedViewTab, focusedTab, item.uid, dispatch]);
+
+  // Measure the request workspace (section.main) while fullscreen and track
+  // resizes / sidebar toggles so the overlay keeps covering exactly that area.
+  useEffect(() => {
+    if (!isFullscreen) {
+      setFsRect(null);
+      return;
+    }
+    const mainEl = wrapperRef.current?.closest('section.main');
+    if (!mainEl) return;
+    const update = () => {
+      const r = mainEl.getBoundingClientRect();
+      setFsRect({ top: r.top, left: r.left, width: r.width, height: r.height });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(mainEl);
+    window.addEventListener('resize', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, [isFullscreen]);
+
+  // Exit fullscreen on Escape
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isFullscreen]);
 
   const handleFormatChange = useCallback((newFormat) => {
     dispatch(updateResponseFormat({ uid: item.uid, responseFormat: newFormat }));
@@ -272,6 +314,15 @@ const ResponsePane = ({ item, collection }) => {
       </div>
 
       <div className="flex items-center response-pane-actions">
+        <button
+          type="button"
+          className="fullscreen-toggle"
+          title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen response'}
+          data-testid="response-fullscreen-btn"
+          onClick={() => setIsFullscreen((v) => !v)}
+        >
+          {isFullscreen ? <IconMinimize size={16} strokeWidth={1.5} /> : <IconMaximize size={16} strokeWidth={1.5} />}
+        </button>
         {focusedTab?.responsePaneTab === 'timeline' ? (
           <ClearTimeline item={item} collection={collection} />
         ) : item?.response && !item?.response?.error ? (
@@ -290,7 +341,11 @@ const ResponsePane = ({ item, collection }) => {
   ) : null;
 
   return (
-    <StyledWrapper className="flex flex-col h-full relative">
+    <StyledWrapper
+      ref={wrapperRef}
+      className={classnames('flex flex-col h-full relative', { 'response-pane--fullscreen': isFullscreen })}
+      style={isFullscreen && fsRect ? { top: fsRect.top, left: fsRect.left, width: fsRect.width, height: fsRect.height } : undefined}
+    >
       <div className="px-4">
         <ResponsiveTabs
           tabs={allTabs}

@@ -54,7 +54,21 @@ export default defineConfig({
     }
   },
   html: {
-    title: 'Bruno'
+    title: 'Bruno',
+    // Inject the zh-CN runtime translator BEFORE the bundle scripts.
+    // It patches DOM text setters (textContent/setAttribute/createTextNode),
+    // so it must execute before React writes any text. append:false puts it
+    // at the top of <head>, ahead of the auto-generated defer script tags.
+    // Source: packages/bruno-app/i18n (engine + zh-CN.json), built to
+    // public/static/js/i18n.js via `node packages/bruno-app/i18n/build.js`.
+    tags: [
+      {
+        tag: 'script',
+        attrs: { src: '/static/js/i18n.js', defer: true },
+        head: true,
+        append: false
+      }
+    ]
   },
   tools: {
     rspack: {

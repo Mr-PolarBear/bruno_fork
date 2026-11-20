@@ -117,6 +117,36 @@ const StyledWrapper = styled.div`
       }
     }
   }
+
+  .fullscreen-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    margin-right: 6px;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: ${(props) => props.theme.colors.text.subtext0};
+    cursor: pointer;
+
+    &:hover {
+      color: ${(props) => props.theme.text};
+      background: ${(props) => props.theme.sidebar.collection.item.hoverBg};
+    }
+  }
+
+  // Covers the request workspace (section.main) so long responses get full
+  // height. top/left/width/height are set inline from the measured rect;
+  // inset:0 is just the fallback until the first measurement lands.
+  // z-index stays below Modal (20) and tippy dropdowns so overlays still work.
+  &.response-pane--fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 15;
+    background: ${(props) => props.theme.bg};
+    padding: 0.5rem 0.5rem 0;
+  }
 `;
 
 export default StyledWrapper;

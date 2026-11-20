@@ -117,7 +117,7 @@ const config = {
     target: [
       {
         target: 'nsis',
-        arch: ['x64', 'arm64']
+        arch: ['x64']
       }
     ],
     signtoolOptions: {

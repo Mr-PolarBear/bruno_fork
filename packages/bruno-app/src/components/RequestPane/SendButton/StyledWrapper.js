@@ -12,8 +12,16 @@ const StyledWrapper = styled.div`
   }
 
   button {
-    width: 100%;
     height: 100%;
+  }
+
+  > div > button {
+    width: 100%;
+  }
+
+  &.has-split button[data-action] {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
 `;
 

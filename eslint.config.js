@@ -139,7 +139,7 @@ module.exports = runESMImports().then(() => defineConfig([
   },
   {
     // Rsbuild/rspack plugins are Node build tooling (CommonJS + ESM), not browser UI.
-    files: ['packages/bruno-app/plugins/**/*.{js,cjs,mjs}'],
+    files: ['packages/bruno-app/plugins/**/*.{js,cjs,mjs}', 'packages/bruno-app/i18n/**/*.js'],
     languageOptions: {
       globals: {
         ...globals.node,

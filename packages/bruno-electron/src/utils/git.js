@@ -262,6 +262,27 @@ const commitChanges = async (gitRootPath, message) => {
   });
 };
 
+// Commits fail when neither global nor repo-local git identity is configured
+// (common on fresh intranet machines). Fall back to a repo-local identity so
+// commits work out of the box without touching the user's global git config.
+const ensureGitUserIdentity = async (gitRootPath) => {
+  const git = getSimpleGitInstanceForPath(gitRootPath);
+  const readConfig = async (key) => {
+    try {
+      return (await git.raw(['config', key])).trim();
+    } catch {
+      return '';
+    }
+  };
+  const [name, email] = await Promise.all([readConfig('user.name'), readConfig('user.email')]);
+  if (!name) {
+    await git.raw(['config', 'user.name', 'Bruno']);
+  }
+  if (!email) {
+    await git.raw(['config', 'user.email', 'bruno@localhost']);
+  }
+};
+
 const getStagedFileDiff = async (gitRootPath, filePath) => {
   return new Promise((resolve, reject) => {
     const git = getSimpleGitInstanceForPath(gitRootPath);
@@ -1816,6 +1837,7 @@ module.exports = {
   unstageChanges,
   discardChanges,
   commitChanges,
+  ensureGitUserIdentity,
   getChangedFilesInCollectionGit,
   getCollectionGitBranches,
   getDefaultGitBranch,

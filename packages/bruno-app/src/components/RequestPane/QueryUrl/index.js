@@ -394,6 +394,36 @@ const QueryUrl = ({ item, collection, handleRun }) => {
     e.stopPropagation();
     dispatch(cancelRequest(item.cancelTokenUid, item, collection));
   };
+
+  // "Send and Download": send the request, then pop the save dialog once the
+  // response body lands (same behaviour as Postman's split Send button)
+  const downloadAfterSendRef = useRef(false);
+  const handleSendAndDownload = () => {
+    downloadAfterSendRef.current = true;
+    handleRun();
+  };
+
+  useEffect(() => {
+    if (!downloadAfterSendRef.current || isLoading) {
+      return;
+    }
+    const response = item.response || {};
+    downloadAfterSendRef.current = false;
+    if (!response.dataBuffer) {
+      return;
+    }
+    window.ipcRenderer
+      .invoke('renderer:save-response-to-file', response, item?.requestSent?.url, item.pathname)
+      .then((result) => {
+        if (result && result.success) {
+          toast.success('Response downloaded to file');
+        }
+      })
+      .catch(() => {
+        toast.error('Failed to download response');
+      });
+  }, [item.requestState, item.response]);
+
   return (
     <StyledWrapper className="flex items-center w-full">
       <div className="flex items-center h-full url-input-group">
@@ -456,6 +486,7 @@ const QueryUrl = ({ item, collection, handleRun }) => {
         isLoading={isLoading || item.response?.stream?.running}
         onSend={handleRun}
         onCancel={handleCancelRequest}
+        onSendAndDownload={handleSendAndDownload}
         testId="send-arrow-icon"
       />
       {generateCodeItemModalOpen && (
