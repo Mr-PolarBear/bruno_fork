@@ -1,3 +1,16 @@
+> **🍴 二次开发版 / Fork Notice**
+>
+> 本仓库是 [usebruno/bruno](https://github.com/usebruno/bruno)（MIT 开源版）的二次开发分支，
+> 在**不改动付费授权逻辑**的前提下新增：
+>
+> - **集合 Git 管理**：init / 变更查看 / commit / fetch / pull / push / **定时自动提交**（免费，入口：集合设置 → `Git` 标签）
+> - **简体中文界面**：运行时注入式汉化（约 1250 词条），不影响功能与升级
+> - **响应区全屏**、**Send and Download**（Postman 式分裂按钮）
+> - `pack.bat` 一键 Windows 打包（可选代码签名）
+>
+> 👉 完整改动清单与构建方法见 **[FORK_CHANGES.md](FORK_CHANGES.md)** ·
+> 功能分支：`internal/oss-git-zh-cn`（即本默认分支）
+
 <br />
 <img src="assets/images/logo-transparent.png" width="80"/>
 
