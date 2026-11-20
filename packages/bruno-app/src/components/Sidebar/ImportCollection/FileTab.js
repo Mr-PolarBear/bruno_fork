@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { IconFileImport } from '@tabler/icons';
 import { toastError } from 'utils/common/error';
 import { isPostmanCollection } from 'utils/importers/postman-collection';
+import { isPostmanDump, postmanDumpToV21Collections } from 'utils/importers/postman-dump';
 import { isInsomniaCollection } from 'utils/importers/insomnia-collection';
 import { isOpenApiSpec, isSwagger2Spec } from 'utils/importers/openapi-collection';
 import { isWSDLCollection } from 'utils/importers/wsdl-collection';
@@ -82,6 +83,14 @@ const FileTab = ({
           const text = await file.text();
           const data = parseFileText(text, file);
 
+          // Postman 全量数据导出（v1 dump）：先转 v2.1，一个集合一个导入项
+          if (isPostmanDump(data)) {
+            postmanDumpToV21Collections(data).forEach((col) => {
+              filesData.push({ file, data: col, type: 'postman' });
+            });
+            continue;
+          }
+
           // Determine type for each file
           let type = null;
           if (isOpenApiSpec(data)) {
@@ -132,6 +141,24 @@ const FileTab = ({
 
       if (!data) {
         throw new Error('Failed to parse file content');
+      }
+
+      // Postman 全量数据导出（v1 dump）：转成 v2.1 后复用 postman 导入管线；
+      // 含多个集合时走批量入口，让用户勾选要导哪些
+      if (isPostmanDump(data)) {
+        const converted = postmanDumpToV21Collections(data);
+        if (!converted.length) {
+          throw new Error('Unsupported collection format');
+        }
+        if (converted.length === 1) {
+          await handleSubmit({ rawData: converted[0], type: 'postman' });
+        } else {
+          await handleSubmit({
+            filesData: converted.map((col) => ({ file, data: col, type: 'postman' })),
+            type: 'multiple'
+          });
+        }
+        return;
       }
 
       let type = null;
