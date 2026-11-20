@@ -8,6 +8,7 @@ import Auth from './Auth';
 import Script from './Script';
 import Test from './Tests';
 import Settings from './Settings';
+import GitSettings from './GitSettings';
 import Protobuf from './Protobuf';
 import StyledWrapper from './StyledWrapper';
 import Vars from './Vars/index';
@@ -97,6 +98,9 @@ const CollectionSettings = ({ collection }) => {
       case 'settings': {
         return <Settings collection={collection} section={collection.settingsSection} onSelect={setSettingsSection} indicators={settingsIndicators} />;
       }
+      case 'git': {
+        return <GitSettings collection={collection} />;
+      }
       case 'protobuf': {
         return <Protobuf collection={collection} />;
       }
@@ -148,6 +152,14 @@ const CollectionSettings = ({ collection }) => {
           >
             Settings
             {(hasPresets || hasProxy || hasClientCerts) && <StatusDot />}
+          </div>
+          <div
+            className={getTabClassname('git')}
+            role="tab"
+            data-testid="collection-settings-tab-git"
+            onClick={() => setTab('git')}
+          >
+            Git
           </div>
         </div>
         {AI_TABS.includes(tab) && (

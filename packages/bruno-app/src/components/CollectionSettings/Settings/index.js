@@ -1,21 +1,19 @@
 import React, { useRef } from 'react';
 import classnames from 'classnames';
-import { IconAdjustmentsHorizontal, IconWorld, IconCertificate, IconBrandGit } from '@tabler/icons';
+import { IconAdjustmentsHorizontal, IconWorld, IconCertificate } from '@tabler/icons';
 import StatusDot from 'components/StatusDot';
 import Presets from '../Presets';
 import ProxySettings from '../ProxySettings';
 import ClientCertSettings from '../ClientCertSettings';
-import GitSettings from '../GitSettings';
 import StyledWrapper from './StyledWrapper';
 
-export const SETTINGS_SECTIONS = ['presets', 'proxy', 'clientCert', 'git'];
+export const SETTINGS_SECTIONS = ['presets', 'proxy', 'clientCert'];
 export const DEFAULT_SETTINGS_SECTION = 'presets';
 
 const ITEMS = [
   { key: 'presets', label: 'Presets', Icon: IconAdjustmentsHorizontal },
   { key: 'proxy', label: 'Proxy', Icon: IconWorld },
-  { key: 'clientCert', label: 'Client certificates', Icon: IconCertificate },
-  { key: 'git', label: 'Git', Icon: IconBrandGit }
+  { key: 'clientCert', label: 'Client certificates', Icon: IconCertificate }
 ];
 
 const renderSection = (section, collection) => {
@@ -24,8 +22,6 @@ const renderSection = (section, collection) => {
       return <ProxySettings collection={collection} />;
     case 'clientCert':
       return <ClientCertSettings collection={collection} />;
-    case 'git':
-      return <GitSettings collection={collection} />;
     case 'presets':
     default:
       return <Presets collection={collection} />;
