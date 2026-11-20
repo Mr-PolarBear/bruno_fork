@@ -3,8 +3,10 @@ require('dotenv').config({ path: process.env.DOTENV_PATH });
 const isBenchmark = process.env.BRUNO_BENCHMARK === 'true';
 
 const config = {
-  appId: 'com.usebruno.app',
-  productName: isBenchmark ? 'Bruno Benchmark' : 'Bruno',
+  // Fork rebrand: distinct appId so this build installs/uninstalls and stores
+  // userData (%APPDATA%\bruno_mrb) independently of the official Bruno app.
+  appId: 'com.github.mrpolarbear.brunomrb',
+  productName: isBenchmark ? 'Bruno Benchmark' : 'bruno_mrb',
   extraMetadata: {
     brunoBuild: {
       benchmark: isBenchmark,
@@ -23,6 +25,15 @@ const config = {
     }
   ],
   files: ['**/*'],
+  // Fork: auto-update must check OUR releases, not upstream — otherwise
+  // electron-updater would replace this fork build with official Bruno.
+  publish: [
+    {
+      provider: 'github',
+      owner: 'Mr-PolarBear',
+      repo: 'bruno_fork'
+    }
+  ],
   afterSign: 'notarize.js',
   mac: {
     artifactName: '${name}_${version}_${arch}_${os}.${ext}',
@@ -121,7 +132,7 @@ const config = {
       }
     ],
     signtoolOptions: {
-      publisherName: 'Bruno Software Inc'
+      publisherName: 'bruno_mrb'
     }
   },
   nsis: {

@@ -54,7 +54,7 @@ export default defineConfig({
     }
   },
   html: {
-    title: 'Bruno',
+    title: 'bruno_mrb',
     // Inject the zh-CN runtime translator BEFORE the bundle scripts.
     // It patches DOM text setters (textContent/setAttribute/createTextNode),
     // so it must execute before React writes any text. append:false puts it

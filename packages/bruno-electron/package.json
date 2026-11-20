@@ -1,11 +1,11 @@
 {
   "version": "2.0.0",
-  "name": "bruno",
-  "description": "Opensource API Client for Exploring and Testing APIs",
-  "homepage": "https://www.usebruno.com",
+  "name": "bruno_mrb",
+  "description": "Opensource API Client for Exploring and Testing APIs (internal fork)",
+  "homepage": "https://github.com/Mr-PolarBear/bruno_fork",
   "repository": {
     "type": "git",
-    "url": "https://github.com/usebruno/bruno.git"
+    "url": "https://github.com/Mr-PolarBear/bruno_fork.git"
   },
   "private": true,
   "main": "src/index.js",
