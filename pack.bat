@@ -18,7 +18,7 @@ set ROOT=%~dp0
 set REPO=%ROOT%
 set CSC_LINK=%ROOT%..\codesign\bruno-codesign.pfx
 if not exist "%CSC_LINK%" set CSC_LINK=%ROOT%codesign\bruno-codesign.pfx
-set CSC_KEY_PASSWORD=bruno-internal-2026
+if not defined CSC_KEY_PASSWORD set CSC_KEY_PASSWORD=bruno-internal-2026
 set ELECTRON_RUN_AS_NODE=
 
 if not exist "%REPO%\package.json" (
