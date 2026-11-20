@@ -79,7 +79,20 @@ packages/bruno-app/src/components/RequestPane/SendButton/
 packages/bruno-app/src/components/RequestPane/QueryUrl/index.js
 ```
 
-### 5. 构建脚本与平台
+### 5. 应用改名 bruno_mrb（fork 品牌化）
+
+- `electron-builder-config.js`：`productName: 'bruno_mrb'` → exe 名、
+  安装包名、开始菜单、安装目录、窗口标题全部跟随；
+  `appId: 'com.github.mrpolarbear.brunomrb'` → 与官方 Bruno **互不冲突可共存**，
+  卸载注册表、用户数据目录（`%APPDATA%\bruno_mrb`）均独立
+- `publish` 指向本 fork（`Mr-PolarBear/bruno_fork`）——**关键修复**：
+  上游默认会让自动更新去 `usebruno/bruno` 拉新版本覆盖二开版；
+  改成自己的仓库后，更新通道由 fork 的 Releases 控制
+- `packages/bruno-electron/package.json`：`name: 'bruno_mrb'`（`artifactName`
+  的 `${name}` 来源）、repository 指向 fork
+- 自定义你自己的名字：改上述 `productName` + `name` + `appId` 三处即可
+
+### 6. 构建脚本与平台
 
 - `pack.bat`：一键打包（`pack.bat` 全量 / `pack.bat fast` 快速），
   自动跑 i18n 构建 + web + electron + 签名；签名证书缺失自动降级无签名

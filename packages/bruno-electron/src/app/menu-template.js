@@ -140,7 +140,7 @@ module.exports = template;
     'Actual Size': '实际大小',
     'Zoom In': '放大',
     'Zoom Out': '缩小',
-    'About Bruno': '关于 Bruno',
+    'About Bruno': '关于 bruno_mrb',
     'Documentation': '文档',
     'Preferences': '偏好设置',
     'Settings': '设置'
