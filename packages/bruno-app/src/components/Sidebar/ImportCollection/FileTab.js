@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { IconFileImport } from '@tabler/icons';
 import { toastError } from 'utils/common/error';
 import { isPostmanCollection } from 'utils/importers/postman-collection';
-import { isPostmanDump, postmanDumpToV21Collections } from 'utils/importers/postman-dump';
+import { isPostmanDump, postmanDumpToV21Collections, postmanDumpToV21Environments } from 'utils/importers/postman-dump';
 import { isInsomniaCollection } from 'utils/importers/insomnia-collection';
 import { isOpenApiSpec, isSwagger2Spec } from 'utils/importers/openapi-collection';
 import { isWSDLCollection } from 'utils/importers/wsdl-collection';
@@ -85,7 +85,10 @@ const FileTab = ({
 
           // Postman 全量数据导出（v1 dump）：先转 v2.1，一个集合一个导入项
           if (isPostmanDump(data)) {
+            const dumpEnvs = postmanDumpToV21Environments(data);
             postmanDumpToV21Collections(data).forEach((col) => {
+              // 工作区级环境随行携带：用户导哪个集合，env 就落到哪个集合
+              if (dumpEnvs.length) col.__dumpEnvironments = dumpEnvs;
               filesData.push({ file, data: col, type: 'postman' });
             });
             continue;
@@ -149,6 +152,12 @@ const FileTab = ({
         const converted = postmanDumpToV21Collections(data);
         if (!converted.length) {
           throw new Error('Unsupported collection format');
+        }
+        const dumpEnvs = postmanDumpToV21Environments(data);
+        if (dumpEnvs.length) {
+          converted.forEach((col) => {
+            col.__dumpEnvironments = dumpEnvs;
+          });
         }
         if (converted.length === 1) {
           await handleSubmit({ rawData: converted[0], type: 'postman' });

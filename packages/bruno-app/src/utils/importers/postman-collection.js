@@ -1,4 +1,5 @@
 import fileDialog from 'file-dialog';
+import { postmanToBrunoEnvironment } from '@usebruno/converters';
 import { BrunoError } from 'utils/common/error';
 import { safeParseJSON } from 'utils/common/index';
 
@@ -14,7 +15,18 @@ const readFile = (files) => {
 const postmanToBruno = (collection, options = {}) => {
   return new Promise((resolve, reject) => {
     window.ipcRenderer.invoke('renderer:convert-postman-to-bruno', collection, options)
-      .then((result) => resolve(result))
+      .then((result) => {
+        // Postman dump 携带的工作区级环境（__dumpEnvironments 由 postman-dump 注入）：
+        // 转成 Bruno 环境对象挂到集合上，import-collection 会写进 environments/ 目录
+        if (result?.collection && Array.isArray(collection?.__dumpEnvironments) && collection.__dumpEnvironments.length) {
+          try {
+            result.collection.environments = collection.__dumpEnvironments.map(postmanToBrunoEnvironment);
+          } catch (envErr) {
+            console.error('Failed to convert dump environments:', envErr);
+          }
+        }
+        resolve(result);
+      })
       .catch((err) => {
         console.error('Error converting Postman to Bruno via Electron:', err);
         reject(new BrunoError('Conversion failed'));

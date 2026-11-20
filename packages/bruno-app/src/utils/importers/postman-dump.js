@@ -492,6 +492,31 @@ const convertV1Collection = (c) => {
 };
 
 /**
+ * dump 的 environments 是"工作区级"环境（v1 格式 {name, values:[{key,value,enabled}]}），
+ * 转成 v2 环境对象，交给 postmanToBrunoEnvironment 产出 Bruno 环境。
+ * dump 级别的 env 不归属任何单一集合，由调用方决定挂到哪个转换结果上。
+ */
+const postmanDumpToV21Environments = (data) => {
+  if (!data || !Array.isArray(data.environments)) {
+    return [];
+  }
+  return data.environments
+    .filter((e) => e && typeof e === 'object' && typeof e.name === 'string')
+    .map((e) => ({
+      name: e.name,
+      values: (Array.isArray(e.values) ? e.values : [])
+        .filter((v) => v && v.key != null && v.key !== '')
+        .map((v) => ({
+          key: v.key,
+          value: v.value != null ? String(v.value) : '',
+          enabled: v.enabled !== false,
+          type: v.type === 'secret' ? 'secret' : 'default'
+        })),
+      _postman_variable_scope: 'environment'
+    }));
+};
+
+/**
  * 入口：dump/单 v1 集合 → v2.1 集合数组（dump 可能含多个集合，逐个转）。
  */
 const postmanDumpToV21Collections = (data) => {
@@ -499,4 +524,4 @@ const postmanDumpToV21Collections = (data) => {
   return list.filter(looksLikeV1Collection).map(convertV1Collection);
 };
 
-export { isPostmanDump, postmanDumpToV21Collections };
+export { isPostmanDump, postmanDumpToV21Collections, postmanDumpToV21Environments };
