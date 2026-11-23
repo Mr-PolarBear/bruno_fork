@@ -95,7 +95,8 @@ AppDocuments.registerScheme();
 // Reference: https://content-security-policy.com/
 const contentSecurityPolicy = [
   'default-src \'self\'',
-  'connect-src \'self\' https://*.posthog.com',
+  // 内网二开：不放行 posthog.com（遥测已禁用，connect-src 只留自身）
+  'connect-src \'self\'',
   'font-src \'self\' https: data:;',
   'frame-src data:',
   'script-src \'self\' data:',
