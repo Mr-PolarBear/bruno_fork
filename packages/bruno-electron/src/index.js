@@ -7,6 +7,17 @@ const { initializeShellEnv, waitForShellEnv } = require('./store/shell-env-state
 const { percentageToZoomLevel } = require('@usebruno/common');
 const { isBenchmarkEnabled } = require('./utils/benchmark');
 
+// 内网分发加固：GUI 应用不依赖 stdout，但 console.log 写入已关闭的管道时
+// （例如从终端/cmd 启动后原窗口被关闭）会抛 EPIPE 直接崩主进程。
+// 吞掉 EPIPE 即可，其余 stream 错误照常抛出便于发现问题。
+for (const stream of [process.stdout, process.stderr]) {
+  stream?.on?.('error', (err) => {
+    if (err?.code !== 'EPIPE') {
+      throw err;
+    }
+  });
+}
+
 if (isDev) {
   if (!fs.existsSync(path.join(__dirname, '../../bruno-js/src/sandbox/bundle-browser-rollup.js'))) {
     console.log('JS Sandbox libraries have not been bundled yet');
